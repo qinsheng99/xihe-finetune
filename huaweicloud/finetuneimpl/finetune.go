@@ -25,6 +25,7 @@ func NewFinetune(cfg *ModelartsConfig) (domain.Finetune, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &finetuneImpl{cfg: cfg, cli: utils.NewHttpClient(3)}, nil
 }
 
@@ -44,6 +45,7 @@ func (f *finetuneImpl) checkTokenExpire() bool {
 func (f *finetuneImpl) Token() (t string, err error) {
 	if f.checkTokenExpire() {
 		t = f.token
+
 		return
 	}
 	var req *http.Request
@@ -57,12 +59,18 @@ func (f *finetuneImpl) Token() (t string, err error) {
 	req.Header.Set("Content-Type", "application/json")
 
 	var res = new(domain.TokenInfo)
+	//type TokenInfo struct {
+	//	Duration int64  `json:"duration"`
+	//	Token    string `json:"token"`
+	//	Msg      string `json:"msg"`
+	//	Status   string `json:"status"`
+	//}
 	_, err = f.cli.ForwardTo(req, res)
 	if err != nil {
 		return "", err
 	}
 
-	if len(res.Msg) > 0 {
+	if res.Status != "200" {
 		err = errors.New(res.Msg)
 		return
 	}
@@ -72,6 +80,7 @@ func (f *finetuneImpl) Token() (t string, err error) {
 
 	f.token = t
 	f.expire = time.Now().Add(time.Duration(res.Duration) * time.Second)
+
 	return
 }
 
@@ -99,6 +108,11 @@ func (f *finetuneImpl) CreateFinetune(options *domain.CreateFinetuneOptions) (jo
 	req.Header.Set("Authorization", "JWT "+token)
 
 	var res = new(domain.CreateFinetuneInfo)
+	//type CreateFinetuneInfo struct {
+	//	Status int    `json:"status"`
+	//	Msg    string `json:"msg"`
+	//	JobId  string `json:"job_id"`
+	//}
 	_, err = f.cli.ForwardTo(req, res)
 	if err != nil {
 		return
@@ -133,18 +147,34 @@ func (f *finetuneImpl) GetFinetune(jobId string) (info domain.FinetuneData, err 
 	req.Header.Set("Authorization", "JWT "+token)
 
 	var res = new(domain.GetFinetuneInfo)
+	//type GetFinetuneInfo struct {
+	//	Status int          `json:"status"`
+	//	Msg    string       `json:"msg"`
+	//	Data   FinetuneData `json:"data"`
+	//}
+	//
+	//type FinetuneData struct {
+	//	TaskName   string `json:"task_name"`
+	//	Framework  string `json:"framework"`
+	//	Phase      string `json:"phase"`
+	//	TaskType   string `json:"task_type"`
+	//	Runtime    int    `json:"runtime"`
+	//	CreatedAt  string `json:"created_at"`
+	//	EngineName string `json:"engine_name"`
+	//}
 
 	_, err = f.cli.ForwardTo(req, res)
 	if err != nil {
 		return
 	}
 
-	if res.Status != 200 {
+	if res.Status == -1 {
 		err = fmt.Errorf(res.Msg)
 		return
 	}
 
 	info = res.Data
+
 	return
 }
 
@@ -180,6 +210,7 @@ func (f *finetuneImpl) DeleteFinetune(jobId string) (err error) {
 		err = errors.New(res.Msg)
 		return
 	}
+
 	return
 }
 
@@ -214,6 +245,7 @@ func (f *finetuneImpl) TerminateFinetune(jobId string) (err error) {
 		err = errors.New(res.Msg)
 		return
 	}
+
 	return
 }
 
@@ -235,6 +267,11 @@ func (f *finetuneImpl) FinetuneLog(jobId string) (content string, err error) {
 	req.Header.Set("Authorization", "JWT "+token)
 
 	var res = new(domain.FinetuneLogInfo)
+	//type FinetuneLogInfo struct {
+	//	Status int    `json:"status"`
+	//	Msg    string `json:"msg"`
+	//	ObsUrl string `json:"obs_url"`
+	//}
 
 	_, err = f.cli.ForwardTo(req, res)
 	if err != nil {
@@ -246,6 +283,7 @@ func (f *finetuneImpl) FinetuneLog(jobId string) (content string, err error) {
 		return
 	}
 
-	content = res.Data.Content
+	content = res.ObsUrl
+
 	return
 }

@@ -10,10 +10,12 @@ type Finetune interface {
 	FinetuneLog(jobId string) (content string, err error)
 }
 
+// TokenInfo 获取token
 type TokenInfo struct {
 	Duration int64  `json:"duration"`
 	Token    string `json:"token"`
 	Msg      string `json:"msg"`
+	Status   string `json:"status"`
 }
 
 type CreateFinetuneOptions struct {
@@ -30,12 +32,14 @@ type Parameter struct {
 	Value string `json:"value"`
 }
 
+// CreateFinetuneInfo 创建微调
 type CreateFinetuneInfo struct {
 	Status int    `json:"status"`
 	Msg    string `json:"msg"`
 	JobId  string `json:"job_id"`
 }
 
+// GetFinetuneInfo 获取微调
 type GetFinetuneInfo struct {
 	Status int          `json:"status"`
 	Msg    string       `json:"msg"`
@@ -47,16 +51,14 @@ type FinetuneData struct {
 	Framework  string `json:"framework"`
 	Phase      string `json:"phase"`
 	TaskType   string `json:"task_type"`
-	Runtime    string `json:"runtime"`
+	Runtime    int    `json:"runtime"`
 	CreatedAt  string `json:"created_at"`
 	EngineName string `json:"engine_name"`
 }
 
+// FinetuneLogInfo 获取日志
 type FinetuneLogInfo struct {
 	Status int    `json:"status"`
 	Msg    string `json:"msg"`
-	Data   struct {
-		LogPath string `json:"log_path"`
-		Content string `json:"content"`
-	} `json:"data"`
+	ObsUrl string `json:"obs_url"`
 }

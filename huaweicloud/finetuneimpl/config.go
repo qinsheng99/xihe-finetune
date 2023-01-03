@@ -27,5 +27,6 @@ func (m *ModelartsConfig) Validate() error {
 	if len(m.Username) == 0 || len(m.Password) == 0 || len(m.Endpoint) == 0 {
 		return fmt.Errorf("parameter is empty")
 	}
+
 	return nil
 }
